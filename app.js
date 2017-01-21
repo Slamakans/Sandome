@@ -13,7 +13,11 @@ client.on('message', async message => {
     const result = await processCommand(message);
     if (result) Logger.info(result);
   } catch (err) {
-    if (['Failed Validation'].includes(err)) return;
+    if (err === 'Failed Validation') return;
+    if (err === 'Insufficient Permissions') {
+      // Tell the author somehow, TBD
+      return;
+    }
     Logger.error(err);
   }
 });

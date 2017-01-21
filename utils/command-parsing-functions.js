@@ -15,6 +15,7 @@ module.exports = class CommandParsingFunctions {
    * @returns {boolean} Whether the message passed or not
    */
   static validateCommand(message) {
+    if (!message.member) return false;
     if (message.author.bot) return false;
 
     const { content, guild } = message;
@@ -49,9 +50,13 @@ module.exports = class CommandParsingFunctions {
       try {
         Logger.debug('Command: ', command);
         Logger.debug('Args: ', args);
-        return Promise.resolve(
-          CommandParsingFunctions.getCommandObject(command).run(message, args)
-        );
+        const commandObject = CommandParsingFunctions.getCommandObject(command);
+
+        if (commandObject.canRun(message.member)) {
+          return commandObject.run(message, args);
+        } else {
+          return Promise.reject('Insufficient Permissions');
+        }
       } catch (err) {
         return Promise.reject(err);
       }

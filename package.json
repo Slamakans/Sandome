@@ -1,0 +1,24 @@
+{
+  "name": "sandome",
+  "version": "1.0.0",
+  "description": "RPG bot for Discord, written in the Discord.js library.",
+  "main": "app.js",
+  "scripts": {
+    "test": "mocha --reporter --harmony spec"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/slamakans/sandome.git"
+  },
+  "author": "Alexander Fougner <alexander.fougner@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/slamakans/sandome/issues"
+  },
+  "homepage": "https://github.com/slamakans/sandome#readme",
+  "dependencies": {
+    "chai": "^3.5.0",
+    "discord.js": "github:hydrabolt/discord.js#indev-prism",
+    "mocha": "^3.2.0"
+  }
+}

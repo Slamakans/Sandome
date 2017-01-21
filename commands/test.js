@@ -1,6 +1,6 @@
-exports.aliases = ['ping'];
+const Command = require('../classes/Command.js');
 
-exports.run = async message => {
+module.exports = new Command(['ping'], async message => {
   await message.channel.sendMessage('PONGEZ!');
   return 'Ponge';
-};
+});
