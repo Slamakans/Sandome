@@ -1,8 +1,15 @@
 module.exports = class Command {
-  constructor(aliases, run, options = {}) {
-    this.aliases = aliases;
+  constructor(run, aliases = [], options = {}) {
     this.run = run;
+
+    this.aliases = aliases;
+
     this.permissions = [];
+
+    this.whitelist = [];
+
+    this.type = 'normal';
+
     Object.assign(this, options);
   }
 
@@ -13,6 +20,7 @@ module.exports = class Command {
    */
   async canRun(member) {
     if (this.permissions.length && !member.hasPermissions(this.permissions)) return false;
+    if (this.whitelist.length && !this.whitelist.includes(member.id)) return false;
 
     return true;
   }

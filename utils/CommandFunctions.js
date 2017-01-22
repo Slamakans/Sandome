@@ -1,13 +1,13 @@
 const fs = require('fs');
+const { Collection } = require('discord.js');
 
 const Logger = require('./logger.js');
-const { getPrefix } = require('./prefix-functions.js');
+const { getPrefix } = require('./PrefixFunctions.js');
 const { promisify } = require('./misc.js');
 
-const { Collection } = require('discord.js');
 const commands = new Collection();
 
-module.exports = class CommandParsingFunctions {
+module.exports = class CommandFunctions {
 
   /**
    * Whether or not the message starts with the correct prefix and is not from a bot account
@@ -34,7 +34,9 @@ module.exports = class CommandParsingFunctions {
     const command = content.toLowerCase().split(' ').shift()
       .replace(prefix, '');
     const args = content.replace(new RegExp(prefix, 'i'), '')
-      .replace(new RegExp(command, 'i'), '');
+      .replace(new RegExp(command, 'i'), '')
+      .trim()
+      .split(' ');
 
     return { command, args };
   }
@@ -42,26 +44,31 @@ module.exports = class CommandParsingFunctions {
   /**
    * Validates, parses and runs a command if it's valid
    * @param {Message} message The message to process
+   * @param {Game} game This will be passed to the run function of a GameCommand
    * @returns {Promise} The result of running the command, useful for debug/info logging.
    */
-  static async processCommand(message) {
-    if (CommandParsingFunctions.validateCommand(message)) {
-      const { command, args } = CommandParsingFunctions.parseCommand(message);
+  static async processCommand(message, game) {
+    if (CommandFunctions.validateCommand(message)) {
+      const { command, args } = CommandFunctions.parseCommand(message);
       try {
         Logger.debug('Command: ', command);
         Logger.debug('Args: ', args);
-        const commandObject = CommandParsingFunctions.getCommandObject(command);
+        const commandObject = CommandFunctions.getCommandObject(command);
 
         if (commandObject.canRun(message.member)) {
-          return commandObject.run(message, args);
+          if (commandObject.type === 'game') {
+            return commandObject.run(game, message, args);
+          } else {
+            return commandObject.run(message, args);
+          }
         } else {
-          return Promise.reject('Insufficient Permissions');
+          return Promise.reject({ reason: 'Insufficient Permissions' });
         }
       } catch (err) {
-        return Promise.reject(err);
+        return Promise.reject({ reason: err.message });
       }
     } else {
-      return Promise.reject('Failed Validation');
+      return Promise.reject({ reason: 'Failed Validation' });
     }
   }
 
@@ -77,11 +84,15 @@ module.exports = class CommandParsingFunctions {
    * @param {string} command The filename or one of the aliases of a command
    */
   static reloadCommand(command) {
-    const cmd = CommandParsingFunctions.getCommandObject(command);
+    const cmd = CommandFunctions.getCommandObject(command);
     if (cmd) {
       delete require.cache[require.resolve(`.${cmd.requirePath}`)];
-      require(`.${cmd.requirePath}`);
-      Logger.info(`Reloaded ${cmd.requirePath}`);
+
+      const reloadedCommand = require(`.${cmd.requirePath}`);
+      reloadedCommand.requirePath = cmd.requirePath;
+      commands.set(cmd.requirePath.split('/').pop().slice(0, -3), reloadedCommand);
+
+      Logger.info(`Reloaded .${cmd.requirePath}`);
     } else {
       throw new Error('No such command exists');
     }
@@ -100,17 +111,20 @@ module.exports = class CommandParsingFunctions {
 
       files.push(...result.filter(file => file.endsWith('.js')).map(file => `${dir}/${file}`));
 
+      const promises = [];
       for (const directory of directories) {
-        await recurse(`${dir}/${directory}`);
+        promises.push(recurse(`${dir}/${directory}`));
       }
+
+      return Promise.all(promises);
     };
 
     await recurse('commands');
 
     files.forEach(file => {
       const cmd = require(`../${file}`);
-      Logger.debug('cmd (line 80 command-parsing-functions.js): ', cmd);
       cmd.requirePath = `./${file}`;
+      // Logger.debug('cmd (line 80 command-parsing-functions.js): ', cmd);
 
       commands.set(file.split('/').pop().slice(0, -3), cmd);
     });
