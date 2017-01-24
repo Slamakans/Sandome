@@ -57,15 +57,24 @@ module.exports = class CommandFunctions {
 
         if (commandObject.canRun(message.member)) {
           if (commandObject.type === 'game') {
-            return commandObject.run(game, message, args);
+            return await commandObject.run(game, message, args);
           } else {
-            return commandObject.run(message, args);
+            return await commandObject.run(message, args);
           }
         } else {
           return Promise.reject({ reason: 'Insufficient Permissions' });
         }
       } catch (err) {
-        return Promise.reject({ reason: err.message });
+        if (command !== 'eval') {
+          await message.client.channels.get('273476607354863617')
+            .sendMessage(`${'```'}asciidoc\n${err.stack.slice(0, 1950)}${'```'}`);
+
+          return Promise.reject({
+            reason: `error: ${err.message}\n\nThis error message has been sent to the developer(s).`,
+          });
+        } else {
+          return await message.channel.sendMessage(`${'```'}asciidoc\n${err.stack.slice(0, 1950)}${'```'}`);
+        }
       }
     } else {
       return Promise.reject({ reason: 'Failed Validation' });

@@ -24,10 +24,10 @@ client.on('message', async message => {
     }
   } catch (err) {
     if (err.reason === 'Failed Validation') return;
-    if (err.reason === 'Insufficient Permissions') {
-      const response = await message.reply(err.reason);
-      response.delete(5000);
-      return;
+
+    if (err.reason) {
+      const reason = await message.reply(err.reason);
+      reason.delete(5000);
     }
     Logger.error(err.reason || err);
   }
@@ -42,7 +42,7 @@ client.on('ready', () => {
   Logger.log(`Bot is logged in and ready as ${client.user.username}`);
 });
 
-client.on('disconnect', e => `${e.code}: ${e.reason}\n\tClean: ${e.wasClean}`);
+client.ws.on('close', e => `${e.code}: ${e.reason}\n\tClean: ${e.wasClean}`);
 
 client.on('reconnecting', () => console.log('RECONNECTING'));
 
