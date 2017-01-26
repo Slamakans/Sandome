@@ -32,7 +32,7 @@ module.exports = new Command(async (game, message, args) => {
       .setDescription('These are the available classes');
     game.classes.forEach(c => classEmbed.addField(c.name, c.description || '_No description yet_'));
 
-    await message.sendEmbed(classEmbed);
+    await message.channel.sendEmbed(classEmbed);
     const typeCollector = message.channel.createCollector(async m => {
       if (m.author.id !== message.author.id) return false;
 
