@@ -1,6 +1,5 @@
 module.exports = class Class {
-  constructor() {
-    this.meme = undefined;
-    delete this.meme;
+  constructor(data = {}) {
+    Object.assign(this, data);
   }
 };

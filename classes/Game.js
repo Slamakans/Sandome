@@ -1,7 +1,7 @@
 const { Collection } = require('discord.js');
 const EventEmitter = require('events').EventEmitter;
 
-const Race = require('./Race.js');
+const Class = require('./Class.js');
 
 module.exports = class Game extends EventEmitter {
   constructor(data = {}) {
@@ -9,17 +9,9 @@ module.exports = class Game extends EventEmitter {
 
     this.players = new Collection();
 
-    this.races = new Collection([
-      [0, new Race({
-        name: 'Elin',
-        forceGender: 'Female',
-      })],
-      [1, new Race({
-        name: 'Elf',
-      })],
-      [2, new Race({
-        name: 'Human',
-      })],
+    this.classes = new Collection([
+      [0, new Class({ name: 'Guardian' })],
+      [1, new Class({ name: 'Megumin' })],
     ]);
 
     Object.assign(this, data);
