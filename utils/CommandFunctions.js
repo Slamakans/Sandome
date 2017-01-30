@@ -55,6 +55,8 @@ module.exports = class CommandFunctions {
         Logger.debug('Args: ', args);
         const commandObject = CommandFunctions.getCommandObject(command);
 
+        if (!commandObject) return Promise.reject({ reason: 'Invalid Command' });
+
         if (commandObject.canRun(message.member)) {
           if (commandObject.type === 'game') {
             return await commandObject.run(game, message, args);
@@ -66,6 +68,8 @@ module.exports = class CommandFunctions {
         }
       } catch (err) {
         if (command !== 'eval') {
+          if (err.reason) return Promise.reject(err);
+
           await message.client.channels.get('273476607354863617')
             .sendMessage(`${'```'}asciidoc\n${err.stack.slice(0, 1950)}${'```'}`);
 
@@ -109,9 +113,11 @@ module.exports = class CommandFunctions {
 
   /**
    * Initializes all the command files in the commands folder and its subfolders etc.
+   * and assigns the collection of commands to the passed Client.
+   * @param {Client} client The Client object to assign the Collection<name, Command> to (client.commands)
    * @returns {Promise}
    */
-  static async initCommands() {
+  static async initCommands(client) {
     const files = [];
 
     const recurse = async dir => {
@@ -140,6 +146,8 @@ module.exports = class CommandFunctions {
 
     Logger.debug('List of commands:\n', files.join('\n'));
     Logger.info('Initialized commands');
+
+    client.commands = commands;
 
     return Promise.resolve();
   }

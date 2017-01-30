@@ -1,23 +1,25 @@
 const { Collection } = require('discord.js');
 const EventEmitter = require('events').EventEmitter;
 
-const Class = require('./Class.js');
+const Character = require('./Character.js');
 
 module.exports = class Game extends EventEmitter {
   constructor(data = {}) {
     super();
 
-    this.players = new Collection();
-
-    this.classes = new Collection([
-      [0, new Class({ name: 'Guardian' })],
-      [1, new Class({ name: 'Megumin' })],
-    ]);
+    this.characters = new Collection();
 
     Object.assign(this, data);
   }
 
-  player(playerResolvable) {
-    return !playerResolvable;
+  /* Anything with an id property or an author property with an id property (Message) */
+  character(characterResolvable) {
+    const { id } = characterResolvable.author || characterResolvable;
+
+    return this.characters.get(id);
+  }
+
+  createCharacter(user, name) {
+    this.characters.set(user.id, new Character(name));
   }
 };

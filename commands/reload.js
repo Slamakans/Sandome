@@ -6,6 +6,5 @@ module.exports = new Command(
     await reloadCommand(args.join(' '));
     return { response: `_reloaded ${args.join(' ')}_`, time: 2500 };
   },
-  [],
-  { whitelist: ['114758367905447939'] }
+  [], { whitelist: ['114758367905447939'] }
 );

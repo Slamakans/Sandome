@@ -9,14 +9,14 @@ module.exports = new Command(async (message, args) => {
   const code = args.join(' ');
 
   if (!code) {
-    return Promise.reject({ reason: 'where\'s my code?' });
+    return Promise.reject({ reason: 'Where\'s my code?' });
   } else {
     // Error is handled in CommandFunctions.js#76
     const result = await eval(`(async () => {${code}})()`);
 
     let response = inspect(result, { depth });
     if (response.includes(message.client.token)) {
-      response = response.replace(new RegExp(message.client.token, 'g'), 'REDACTED MY MAN');
+      response = response.replace(new RegExp(message.client.token, 'g'), 'REDACTED, MY DUDE');
     }
 
     response = `${'```'}\n${response.replace(/(\\r)?\\n/g, '\n')}${'```'}`;

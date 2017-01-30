@@ -1,3 +1,5 @@
+const Logger = require('../utils/Logger.js');
+
 module.exports = class Command {
   constructor(run, aliases = [], options = {}) {
     this.run = run;
@@ -11,6 +13,8 @@ module.exports = class Command {
     this.type = 'normal';
 
     Object.assign(this, options);
+
+    Logger.debug(require('util').inspect(this));
   }
 
   /**
@@ -23,5 +27,9 @@ module.exports = class Command {
     if (this.whitelist.length && !this.whitelist.includes(member.id)) return false;
 
     return true;
+  }
+
+  get helpLine() {
+    return `**${this.requirePath.split('/').pop().slice(0, -3)}:** ${this.description || 'No description added yet.'}`;
   }
 };
